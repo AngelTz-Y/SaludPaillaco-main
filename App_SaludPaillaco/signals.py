@@ -16,7 +16,7 @@ def crear_grupo_administrador(sender, **kwargs):
         admin_user = User.objects.create_superuser(
             username='admin',
             email='admin@example.com',
-            password='felipe'  # Cambia la contraseña aquí
+            password='admin'  # Cambia la contraseña aquí
         )
         # Asignar el usuario al grupo de Administrador
         admin_user.groups.add(grupo_administrador)

@@ -79,7 +79,7 @@ WSGI_APPLICATION = 'SaludPaillaco.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'SaludPaillaco_bd',
+        'NAME': 'SaludPaillaco_bddd',
         'USER': 'root',
         'PASSWORD': ''
     }

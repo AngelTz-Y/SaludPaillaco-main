@@ -24,7 +24,7 @@ def inicio(request):
                 # Verificar si el usuario es administrador (staff)
                 if user.is_staff:
                     # Si es administrador, redirigir al panel de administración
-                    return redirect('aceptacion_usuario')
+                    return redirect('panel_administrador')
 
                 # Verificar si el usuario pertenece al grupo "usuario en espera"
                 if user.groups.filter(name='usuario en espera').exists():
@@ -172,3 +172,8 @@ def aceptacion_usuario(request):
             return render(request, 'aceptacion_usuario.html', {'error': 'Usuario no encontrado en espera.'})
 
     return render(request, 'aceptacion_usuario.html', {'usuarios_en_espera': usuarios_en_espera})
+
+
+def panel_administrador(request):
+    return render(request, 'Grupos/Administrador/panel_administrador.html')
+    

@@ -23,7 +23,9 @@ urlpatterns = [
     path('', inicio, name='inicio'),
     path('registrarse/', registrarse, name='registrarse'),
     path('registro_exitoso/', registro_exitoso, name='registro_exitoso'),
-    path('aceptacion_usuario/', aceptacion_usuario, name='aceptacion_usuario')
+    path('aceptacion_usuario/', aceptacion_usuario, name='aceptacion_usuario'),
+    path('Panel_Administrador/', panel_administrador, name='panel_administrador'),
+    
     
     
 ]
