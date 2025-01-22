@@ -1,0 +1,354 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IntraNet SaludPaillaco</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="{% static 'style/estilo.css' %}">
+    <!-- Font Awesome Icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+
+<body class="h-full">
+    
+    <nav class="navbar navbar-expand-lg navbar-dark fixed-top bg-dark opacity-90 transition-all duration-300 shadow-lg" id="navbar">
+        <br>
+        <br>
+        <br>
+        <div class="container">
+            <!-- Logo con un corazón rojo y transición de color (se oculta en pantallas pequeñas) -->
+            <a class="navbar-brand text-white font-weight-bold text-shadow-lg transition-all duration-300 hover:text-green-400 d-none d-lg-block" href="/">
+                <div class="d-flex align-items-center justify-content-center">
+                    <span class="nombre-logo text-uppercase">Salud</span>
+                    <i class="fas fa-heartbeat text-danger corazon mx-2"></i> <!-- Corazón centrado con margen -->
+                    <span class="nombre-logo text-uppercase">Paillaco</span>
+                </div>
+            </a>
+    
+            <!-- Botón para el toggle del menú en dispositivos móviles -->
+            <button class="" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class=""></span>
+            </button>
+            
+
+
+            
+            <!-- Imagen de banner alineada a la derecha (siempre visible) -->
+            <div class="navbar-banner">
+                <img src="{% static 'img/banner_paillaco.png' %}" alt="Banner Paillaco" class="banner-img rounded-3">
+            </div>
+        </div>
+    
+        <!-- Líneas arriba y abajo del navbar -->
+        <div class="navbar-lines">
+            <div class="top-line bg-white opacity-30"></div>
+            <div class="bottom-line bg-white opacity-60"></div>
+        </div>
+    </nav>
+
+
+
+    
+    <br>
+    <br>
+
+
+    <br>
+        <br>
+    
+        <!-- Formulario Iniciar Sesión con fondo gris oscuro y bordes sombreados -->
+        <div class="form-container bg-sky-100 p-6 mt-6 rounded-lg shadow-xl border-2 border-gray-300 max-w-sm mr-auto">
+            <div class="text-center mb-6">
+                <!-- Imagen del CESFAM con bordes mejorados -->
+                <img src="{% static 'img/cesfam.png' %}" alt="CESFAM Logo" class="w-24 h-24 rounded-full border-4 border-indigo-600 shadow-2xl mx-auto object-cover">
+            </div>
+        
+            <!-- Título con sombra y mejor contraste -->
+            <h2 class="text-3xl font-extrabold text-center text-gray-800 mb-6" style="text-shadow: 0 2px 6px rgba(0, 0, 0, 0.15), 0 0 25px rgba(0, 0, 255, 0.2), 0 0 50px rgba(0, 0, 255, 0.3);">
+                Bienvenido al Intranet SaludPaillaco
+            </h2>
+        
+            <h3 class="text-xl font-semibold text-center text-gray-700 mb-6">Iniciar Sesión</h3>
+        
+            <form method="POST" class="space-y-5">
+                {% csrf_token %}
+        
+                <!-- Campo RUT -->
+                <div class="mb-4">
+                    <label for="rut" class="block text-sm font-medium text-gray-700 mb-2">RUT:</label>
+                    <div class="relative">
+                        <i class="fas fa-id-card absolute left-3 top-1/2 transform -translate-y-1/2 text-indigo-500"></i>
+                        <input type="text" id="rut" name="rut" class="w-full pl-10 pr-4 py-2 text-gray-900 bg-gray-100 border-2 border-indigo-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-md" placeholder="Ingrese su RUT" required>
+                    </div>
+                </div>
+        
+                <!-- Campo Contraseña -->
+                <div class="mb-5">
+                    <label for="password" class="block text-sm font-medium text-gray-700 mb-2">Contraseña:</label>
+                    <div class="relative">
+                        <i class="fas fa-lock absolute left-3 top-1/2 transform -translate-y-1/2 text-indigo-500"></i>
+                        <input type="password" id="password" name="password" class="w-full pl-10 pr-4 py-2 text-gray-900 bg-gray-100 border-2 border-indigo-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-md" placeholder="Ingrese su contraseña" required>
+                    </div>
+                </div>
+        
+                <!-- Botón Iniciar Sesión con sombra -->
+                <button type="submit" class="w-full bg-indigo-600 text-white py-3 rounded-lg font-semibold text-lg hover:bg-indigo-500 transition-all duration-300 shadow-xl">
+                    <i class="fas fa-sign-in-alt mr-2"></i> Iniciar Sesión
+                </button>
+            </form>
+        
+            <!-- Enlaces de registro y recuperación -->
+            <div class="text-center mt-4 text-gray-700">
+                <p>¿No tienes una cuenta? <a href="{% url 'registrarse' %}" class="text-indigo-400 hover:underline"><i class="fas fa-user-plus"></i> Regístrate aquí</a></p>
+                <p><a href="/recuperar-contraseña/" class="text-indigo-400 hover:underline"><i class="fas fa-key"></i> ¿Olvidaste tu contraseña?</a></p>
+            </div>
+        </div>
+
+        <div class="container-letters flex justify-center relative">
+            <img class="letters absolute top-[-700px] w-[36%] h-auto mt-40 hidden lg:block" src="{% static 'img/letters.png' %}">
+        </div>
+        
+        
+        
+        
+        
+        
+    
+
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+
+    <footer class="navbar-follow text-center py-5 bg-gradient-dark text-white mt-4">
+    <div class="container">
+        <div class="row">
+            <!-- Sección de Soporte al Usuario -->
+            <div class="col-md-6 mb-3 mb-md-0">
+                <section class="user-support">
+                    <h3 class="mb-2 display-4 font-weight-bold text-white">Soporte al Usuario</h3>
+                    <p class="mb-4 text-white-50">
+                        ¿Tienes algún problema o consulta? Nuestro sistema de gestión de tickets está disponible para ayudarte.
+                    </p>
+                    <!-- Botón de Soporte -->
+                    <button class="support-button btn btn-lg btn-outline-light mt-3 transition-all duration-300" data-bs-toggle="modal" data-bs-target="#supportModal">
+                        Crear Ticket de Soporte
+                    </button>
+                </section>
+            </div>
+            
+            <!-- Modal de Soporte -->
+            <div class="modal fade" id="supportModal" tabindex="-1" aria-labelledby="supportModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content rounded-lg shadow-2xl">
+                        <div class="modal-header bg-blue-800 text-white">
+                            <h5 class="modal-title" id="supportModalLabel">Formulario de Ticket</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <form method="POST" class="space-y-8 bg-gradient-to-r from-gray-50 via-white to-gray-100 p-10 rounded-2xl shadow-2xl">
+                                {% csrf_token %}
+                                
+                                <!-- Encabezado del formulario -->
+                                <!-- Título Mejorado con Estilo -->
+                            <h2 class="text-4xl font-extrabold text-center text-gray-900 mb-8">
+                                <span class="bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-600 text-transparent bg-clip-text">
+                                    <i class="fas fa-ticket-alt mr-2 text-indigo-500"></i> Crear Ticket de Soporte
+                                </span>
+                            </h2>
+
+                            <!-- Campo RUT -->
+                            <div class="relative bg-gradient-to-r from-gray-50 to-gray-100 p-4 rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300 mb-6">
+                                <label for="rut" class="block text-sm font-semibold text-gray-700 mb-2">
+                                    <span class="flex items-center">
+                                        <i class="fas fa-id-card text-blue-500 mr-2"></i> RUT:
+                                    </span>
+                                </label>
+                                <input 
+                                    type="text" 
+                                    id="rut" 
+                                    name="rut" 
+                                    placeholder="Ej: 12345678-9" 
+                                    required 
+                                    class="w-full px-5 py-3 text-gray-800 bg-white border-2 border-gray-300 rounded-lg shadow-inner focus:outline-none focus:ring-4 focus:ring-blue-300 focus:border-blue-500 transition-all duration-300"
+                                >
+                            </div>
+
+                            <!-- Campo Nombre Completo -->
+                            <div class="relative bg-gradient-to-r from-gray-50 to-gray-100 p-4 rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300 mb-6">
+                                <label for="name" class="block text-sm font-semibold text-gray-700 mb-2">
+                                    <span class="flex items-center">
+                                        <i class="fas fa-user text-green-500 mr-2"></i> Nombre Completo:
+                                    </span>
+                                </label>
+                                <input 
+                                    type="text" 
+                                    id="name" 
+                                    name="name" 
+                                    placeholder="Ingrese nombre completo" 
+                                    required 
+                                    class="w-full px-5 py-3 text-gray-800 bg-white border-2 border-gray-300 rounded-lg shadow-inner focus:outline-none focus:ring-4 focus:ring-green-300 focus:border-green-500 transition-all duration-300"
+                                >
+                            </div>
+
+                            <!-- Campo Categoría -->
+                            <div class="relative bg-gradient-to-r from-gray-50 to-gray-100 p-4 rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300 mb-6">
+                                <label for="category" class="block text-sm font-semibold text-gray-700 mb-2">
+                                    <span class="flex items-center">
+                                        <i class="fas fa-list text-purple-500 mr-2"></i> Categoría:
+                                    </span>
+                                </label>
+                                <select 
+                                    id="category" 
+                                    name="category" 
+                                    required 
+                                    class="w-full px-5 py-3 text-gray-800 bg-white border-2 border-gray-300 rounded-lg shadow-inner focus:outline-none focus:ring-4 focus:ring-purple-300 focus:border-purple-500 transition-all duration-300"
+                                >
+                                    <option value="" disabled selected>Seleccione una categoría</option>
+                                    <option value="tecnico">Soporte Técnico</option>
+                                    <option value="admin">Problemas Administrativos</option>
+                                    <option value="otros">Otros</option>
+                                </select>
+                            </div>
+
+                                
+                                <!-- Campo Prioridad -->
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-3">Prioridad del Problema:</label>
+                                    <div class="flex justify-between items-center space-x-6">
+                                        <!-- Baja -->
+                                        <label class="flex flex-col items-center cursor-pointer group">
+                                            <input 
+                                                type="radio" 
+                                                name="priority" 
+                                                value="low" 
+                                                required 
+                                                class="hidden peer"
+                                            >
+                                            <div class="w-14 h-14 bg-gray-100 border-4 border-gray-300 rounded-full peer-checked:border-blue-500 peer-checked:ring-4 peer-checked:ring-blue-300 group-hover:scale-110 transition-all duration-300"></div>
+                                            <span class="mt-2 text-sm font-medium text-gray-600 group-hover:text-blue-500">Baja</span>
+                                        </label>
+                                        <!-- Media -->
+                                        <label class="flex flex-col items-center cursor-pointer group">
+                                            <input 
+                                                type="radio" 
+                                                name="priority" 
+                                                value="medium" 
+                                                required 
+                                                class="hidden peer"
+                                            >
+                                            <div class="w-14 h-14 bg-yellow-200 border-4 border-yellow-500 rounded-full peer-checked:border-yellow-600 peer-checked:ring-4 peer-checked:ring-yellow-400 group-hover:scale-110 transition-all duration-300"></div>
+                                            <span class="mt-2 text-sm font-medium text-gray-600 group-hover:text-yellow-600">Media</span>
+                                        </label>
+                                        <!-- Alta -->
+                                        <label class="flex flex-col items-center cursor-pointer group">
+                                            <input 
+                                                type="radio" 
+                                                name="priority" 
+                                                value="high" 
+                                                required 
+                                                class="hidden peer"
+                                            >
+                                            <div class="w-14 h-14 bg-red-500 border-4 border-red-600 rounded-full peer-checked:border-red-700 peer-checked:ring-4 peer-checked:ring-red-600 group-hover:scale-110 transition-all duration-300"></div>
+                                            <span class="mt-2 text-sm font-medium text-gray-600 group-hover:text-red-700">Alta</span>
+                                        </label>
+                                    </div>
+                                </div>
+                                
+                                <!-- Campo Descripción -->
+                                <div class="relative bg-gradient-to-r from-gray-50 via-white to-gray-100 p-4 rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300">
+                                    <!-- Etiqueta -->
+                                    <label for="description" class="block text-sm font-semibold text-gray-700 mb-2">
+                                        <span class="flex items-center">
+                                            <i class="fas fa-comment-dots text-blue-500 mr-2"></i>
+                                            Descripción:
+                                        </span>
+                                    </label>
+                                    
+                                    <!-- Campo de texto -->
+                                    <textarea 
+                                        id="description" 
+                                        name="description" 
+                                        rows="5" 
+                                        placeholder="Describe el problema o consulta de forma clara y detallada..." 
+                                        required 
+                                        class="w-full px-5 py-3 text-gray-800 bg-white border-2 border-gray-300 rounded-lg shadow-inner focus:outline-none focus:ring-4 focus:ring-blue-300 focus:border-blue-500 transition-all duration-300 resize-none"
+                                    ></textarea>
+                                    
+                                    <!-- Indicador visual como etiqueta -->
+                                    <div class="mt-3 flex items-center space-x-2 text-sm text-gray-600">
+                                        <i class="fas fa-info-circle text-blue-500"></i>
+                                        <span class="bg-gray-200 text-gray-700 px-3 py-1 rounded-lg shadow-sm">
+                                            Máximo 500 caracteres
+                                        </span>
+                                    </div>
+                                </div>
+                                
+                                
+                                <!-- Botón Enviar -->
+                                <div>
+                                    <button 
+                                        type="submit" 
+                                        class="w-full py-3 bg-gradient-to-r from-blue-600 to-blue-800 text-white font-bold text-lg rounded-lg shadow-lg hover:from-blue-700 hover:to-blue-900 hover:shadow-xl hover:scale-105 transition-transform duration-300"
+                                    >
+                                        Enviar Ticket
+                                    </button>
+                                </div>
+                            </form>
+                            
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Sección de Información de Contacto -->
+            <div class="col-md-6 text-md-right">
+                <section class="contact-info mb-3">
+                    <h3 class="mb-2 display-4 font-weight-bold">Contáctanos</h3>
+                    <p><strong><i class="fas fa-phone-alt"></i> Teléfono: </strong> +56-63-2421292</p>
+                    <p><strong><i class="fas fa-envelope"></i> Email: </strong> soporte@saludpaillaco.cl</p>
+                    <p><strong><i class="fas fa-map-marker-alt"></i> Dirección: </strong> Mac-iver #1285 con Independencia, Paillaco</p>
+                </section>
+            </div>
+        </div>
+        
+        <!-- Marca de agua -->
+        <div class="watermark text-center mt-3">
+            <p class="text-white text-lg font-semibold">
+                <i class="fas fa-copy text-red-600 mr-2"></i>
+                &copy; 2025 Derechos Reservados - SaludPaillaco
+            </p>
+        </div>
+    </div>
+</footer>
+
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let lastScrollTop = 0; // Para almacenar la posición anterior del scroll
+    
+        window.addEventListener("scroll", function() {
+            const navbar = document.getElementById("navbar");
+            const currentScroll = window.pageYOffset || document.documentElement.scrollTop;
+    
+            // Si el usuario hace scroll hacia abajo, ocultar el navbar
+            if (currentScroll > lastScrollTop) {
+                navbar.style.top = "-80px"; // Ocultar navbar (ajusta el valor según el tamaño del navbar)
+            } else {
+                navbar.style.top = "0"; // Mostrar navbar cuando sube
+            }
+    
+            lastScrollTop = currentScroll <= 0 ? 0 : currentScroll; // Asegurarse de que no pase el scroll hacia arriba de la pantalla
+        });
+    </script>
+</body>
+
+</html>

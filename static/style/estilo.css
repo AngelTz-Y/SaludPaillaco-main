@@ -1,0 +1,164 @@
+footer {
+    background-color: #1f242af7;
+    color: #ffffff;
+}
+
+footer h3 {
+    font-size: 1.25rem;
+    font-weight: 500;
+}
+
+footer .social-links a {
+    font-size: 1.5rem;
+    color: #ffffff;
+    transition: color 0.3s ease;
+}
+
+footer .social-links a:hover {
+    color: #007bff; /* Color al pasar el ratón */
+}
+
+footer .watermark p {
+    font-size: 0.875rem;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+/* Estilo del botón de contacto */
+.help-button {
+    font-size: 1rem;
+    padding: 10px 20px;
+}
+
+footer .extra-info p {
+    font-size: 0.9rem;
+}
+
+@media (max-width: 767px) {
+    footer .text-md-right {
+        text-align: center !important;
+    }
+}
+
+body {
+    background-image: url('https://i.postimg.cc/Wz5SK3RN/logo.png');
+    background-size: auto 100%; /* Mantiene el tamaño original de la imagen y ajusta la altura */
+    background-position: center; /* Centra la imagen */
+    background-repeat: no-repeat; /* Evita que la imagen se repita */
+    background-attachment: fixed; /* Mantiene la imagen fija mientras se hace scroll */
+}
+
+
+
+.letters {
+    width: 500px; /* Ajusta el tamaño de las letras */
+    margin: 0 auto; /* Centra el contenedor */
+    display: block; /* Asegura que se comporte como un bloque para centrarlo */
+    animation: glow 4s infinite alternate; /* Aplica la animación */
+    margin-left: 305px;
+    
+}
+
+/* Animación de brillo */
+@keyframes glow {
+    0% {
+        filter: brightness(2) drop-shadow(0 0 10px rgb(255, 255, 255)); /* Brillo alto */
+    }
+
+}
+
+
+.navbar-banner {
+    position: absolute;
+    top: 3px;
+    right: 5px;
+    width: 400px; /* Puedes cambiar este valor para hacer la imagen más grande o pequeña */
+    height: auto;
+}
+
+.banner-img {
+    width: 100%; /* La imagen ocupará todo el ancho del contenedor */
+    height: auto;
+    border-radius: 8px; /* Bordes redondeados si lo deseas */
+}
+
+
+.corazon {
+    font-size: 3rem; /* Tamaño del corazón */
+    animation: pulso 1.5s infinite, destello 2s infinite; /* Pulso y destello */
+    opacity: 1;
+    margin-top: 10px; /* Separación entre el texto y el corazón */
+    color: #ff4d4d; /* Color del corazón */
+    text-shadow: none; /* Eliminar cualquier sombra de texto */
+}
+
+/* Animación de pulso */
+@keyframes pulso {
+    0% {
+        transform: scale(1); /* Tamaño original */
+    }
+    50% {
+        transform: scale(1.2); /* Aumenta el tamaño */
+    }
+    100% {
+        transform: scale(1); /* Regresa al tamaño original */
+    }
+}
+
+
+
+/* Estilo para el texto de "Salud" */
+.nombre-logo {
+    font-size: 3.5rem;  /* Aumentar tamaño de "Salud" */
+    font-weight: bold;
+    color: #fff;
+}
+
+/* Estilo para el texto de "Paillaco" debajo del corazón */
+.paillaco-logo {
+    font-size: 4rem;  /* Hacer "Paillaco" más grande */
+    font-weight: bold;
+    color: #28a745;  /* Resaltar el texto con verde */
+    margin-top: 15px;
+}
+
+/* Estilo para el contenedor del corazón, asegurándonos de que quede centrado */
+.corazon-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 15px;
+}
+
+/* Alineación de los elementos en el centro */
+.text-center {
+    text-align: center;
+}
+
+/* Ajustes responsivos: centrado para móviles */
+@media (max-width: 991px) {
+    .nombre-logo {
+        font-size: 2.5rem;  /* Reducir tamaño de "Salud" en pantallas pequeñas */
+    }
+
+    .corazon {
+        font-size: 2.5rem;  /* Reducir tamaño del corazón en pantallas pequeñas */
+    }
+
+    .paillaco-logo {
+        font-size: 3rem;  /* Reducir tamaño de "Paillaco" en pantallas pequeñas */
+    }
+}
+
+
+.nombre-logo {
+    font-size: 2rem; /* Ajusta el tamaño de las letras a un valor mucho mayor */
+}
+
+.form-container {
+    margin-left: 100px;
+}
+
+
+
+
+

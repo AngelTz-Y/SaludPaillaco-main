@@ -1,0 +1,373 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+  <title>Formulario de Registro de Funcionarios</title>
+  <link rel="stylesheet" href="{% static 'style/registrarse.css' %}">
+  <style>
+    /* Estilo base del formulario */
+    .form {
+      max-width: 800px;
+      margin: 50px auto;
+      padding: 40px;
+      background-color: #2e2b2b;
+      border-radius: 10px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .title {
+      font-size: 2rem;
+      font-weight: bold;
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .message {
+      font-size: 1rem;
+      text-align: center;
+      color: #666;
+      margin-bottom: 30px;
+    }
+
+    .section-title {
+      font-size: 1.4rem;
+      margin-bottom: 10px;
+    }
+
+    .section-description {
+      font-size: 1.1rem;
+      color: #666;
+      margin-bottom: 20px;
+    }
+
+    .input-group label {
+      display: block;
+      font-size: 1rem;
+      margin-bottom: 5px;
+    }
+
+    .input {
+      width: 100%;
+      padding: 12px;
+      font-size: 1rem;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      margin-bottom: 20px;
+    }
+
+    .input:focus {
+      border-color: #007bff;
+      outline: none;
+    }
+
+    .submit {
+      width: 100%;
+      padding: 14px;
+      font-size: 1rem;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    .submit:hover {
+      background-color: #0056b3;
+    }
+
+    .signin {
+      text-align: center;
+      margin-top: 20px;
+    }
+
+    .signin a {
+      color: #007bff;
+      text-decoration: none;
+    }
+
+    .signin a:hover {
+      text-decoration: underline;
+    }
+
+    .flex {
+      display: flex;
+      gap: 15px;
+    }
+
+    /* Estilo para cambiar el tema */
+    body.dark-mode {
+      background-color: #333;
+      color: white;
+    }
+
+    body.light-mode {
+      background-color: #fff;
+      color: black;
+    }
+    
+    .theme-toggle {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 10px 15px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .theme-toggle:hover {
+      background-color: #0056b3;
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      background-color: rgba(0, 0, 0, 0.4);
+    }
+    
+    .modal-content {
+      background-color: #353535;
+      margin: 15% auto;
+      padding: 20px;
+      border: 1px solid #888;
+      width: 80%;
+      max-width: 600px;
+      border-radius: 8px;
+    }
+    
+    .close {
+      color: #ff0000;
+      float: right;
+      font-size: 28px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    
+    .close:hover,
+    .close:focus {
+      color: rgb(255, 255, 255);
+    }
+    
+    #professionList {
+      list-style: none;
+      padding: 0;
+    }
+    
+    #professionList li {
+      padding: 10px;
+      cursor: pointer;
+      border-bottom: 1px solid #ccc;
+    }
+    
+    #professionList li:hover {
+      background-color: #346affe3;
+    }
+
+    #professionList li {
+      padding: 10px;
+      cursor: pointer;
+      border-radius: 8px; /* Bordes redondeados */
+      transition: background-color 0.3s, transform 0.3s ease-in-out;
+      margin: 5px 0; /* Espacio entre los elementos */
+    }
+    
+    /* Animación para el hover */
+    #professionList li:hover {
+      background-color: #a3c8f0; /* Tono azul claro */
+      transform: scale(1.05); /* Hace que el elemento crezca un poco */
+    }
+    
+    /* Añadir animación suave para el cambio de color de fondo */
+    #professionList li:hover {
+      background-color: #8abde1; /* Azul más intenso */
+      transition: all 0.2s ease;
+    }
+
+  </style>
+</head>
+<body class="dark-mode">
+  <button class="theme-toggle">Cambiar Tema</button>
+
+  <form method="POST" class="form" id="registration-form">
+    {% csrf_token %}
+    <p class="title">Registro de Funcionarios</p>
+    <p class="message">Por favor, complete los datos para el registro.</p>
+
+    <!-- Sección de Credenciales -->
+    <div class="section">
+      <h2 class="section-title">Credenciales de Cuenta Propia</h2>
+      <p class="section-description">Esta sección es para establecer las credenciales personales que usará para acceder al sistema.</p>
+
+      <div class="input-group">
+        <label for="rut">
+          <span>RUT: <span class="required" style="color: red;">*</span></span>
+          <input class="input" type="text" id="rut" name="rut" placeholder="Ej: 12345678-9" required>
+        </label>
+      </div>
+
+      <div class="input-group">
+        <label for="password">
+          <span>Contraseña</span>
+          <input class="input" type="password" id="password" name="password" placeholder="Contraseña" required>
+        </label>
+      </div>
+
+      <div class="input-group">
+        <label for="confirm-password">
+          <span>Confirmar Contraseña</span>
+          <input class="input" type="password" id="confirm-password" name="confirm-password" placeholder="Confirmar Contraseña" required>
+        </label>
+      </div>
+    </div>
+
+    <!-- Sección de Datos Personales -->
+    <div class="section">
+      <h2 class="section-title">Datos Personales</h2>
+      <p class="section-description">Proporcione su información personal para completar el registro.</p>
+
+      <div class="flex">
+        <div class="input-group">
+          <label for="firstname">
+            <span>Nombre</span>
+            <input class="input" type="text" id="firstname" name="firstname" placeholder="Nombre" required>
+          </label>
+        </div>
+
+        <div class="input-group">
+          <label for="lastname">
+            <span>Apellido</span>
+            <input class="input" type="text" id="lastname" name="lastname" placeholder="Apellido" required>
+          </label>
+        </div>
+      </div>
+
+      <div class="input-group">
+        <label for="email">
+          <span>Correo Electrónico</span>
+          <input class="input" type="email" id="email" name="email" placeholder="nickname@tudominio.cl" required>
+        </label>
+      </div>
+
+      <div class="input-group">
+        <label for="phone">
+          <span>Teléfono móvil personal</span>
+          <input class="input" type="tel" id="phone" name="phone" placeholder="Teléfono móvil personal" required>
+        </label>
+      </div>
+
+      <div class="input-group">
+        <label for="profession">
+          <span>Profesión u Oficio</span>
+          <button type="button" class="input" id="profession" onclick="openModal()">Seleccionar profesión u oficio</button>
+          <input type="hidden" name="profession" id="selectedProfession" required>
+        </label>
+
+        <p>Total de usuarios registrados: {{ usuarios_registrados }}</p>
+      </div>
+
+      <!-- Modal -->
+      <div id="professionModal" class="modal">
+        <div class="modal-content">
+          <span class="close" onclick="closeModal()">&times;</span>
+          <h2>Seleccionar Profesión u Oficio</h2>
+          <input type="text" id="searchProfession" placeholder="Buscar profesión..." onkeyup="filterProfessions()">
+          <ul id="professionList">
+            {% for profesion in profesiones %}
+            <li onclick="selectProfession('{{ profesion.id }}', '{{ profesion.profesion_oficio }}')">
+              {{ profesion.profesion_oficio }}
+            </li>
+            {% empty %}
+            <li>No hay profesiones disponibles</li>
+            {% endfor %}
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <button class="submit" type="submit">Enviar</button>
+    <p class="signin">¿Ya tienes una cuenta? <a href="{% url 'inicio' %}">Inicia sesión</a></p>
+</form>
+
+  <script>
+    const themeToggle = document.querySelector('.theme-toggle');
+    const body = document.body;
+
+    themeToggle.addEventListener('click', () => {
+      body.classList.toggle('dark-mode');
+      body.classList.toggle('light-mode');
+      themeToggle.textContent = body.classList.contains('dark-mode') ? 'Cambiar a Claro' : 'Cambiar a Oscuro';
+    });
+
+    function openModal() {
+      document.getElementById('professionModal').style.display = 'block';
+    }
+    
+    function closeModal() {
+      document.getElementById('professionModal').style.display = 'none';
+    }
+    
+    function filterProfessions() {
+      const searchInput = document.getElementById('searchProfession').value.toLowerCase();
+      const professionItems = document.querySelectorAll('#professionList li');
+      
+      professionItems.forEach(item => {
+        const text = item.textContent.toLowerCase();
+        item.style.display = text.includes(searchInput) ? '' : 'none';
+      });
+    }
+    
+    function selectProfession(id, name) {
+      document.getElementById('selectedProfession').value = id;
+      document.getElementById('profession').textContent = name;
+      closeModal();
+    }
+    
+    // Cerrar modal si se hace clic fuera de él
+    window.onclick = function(event) {
+      const modal = document.getElementById('professionModal');
+      if (event.target === modal) {
+        closeModal();
+      }
+    };
+
+    function openModal() {
+      document.getElementById('professionModal').style.display = 'block';
+    }
+  
+    function closeModal() {
+      document.getElementById('professionModal').style.display = 'none';
+    }
+  
+    function selectProfession(id, name) {
+      document.getElementById('selectedProfession').value = id;
+      document.getElementById('profession').textContent = name;
+      closeModal();
+    }
+  
+    function filterProfessions() {
+      var input = document.getElementById("searchProfession");
+      var filter = input.value.toLowerCase();
+      var list = document.getElementById("professionList");
+      var items = list.getElementsByTagName("li");
+      
+      for (var i = 0; i < items.length; i++) {
+        var text = items[i].textContent || items[i].innerText;
+        items[i].style.display = text.toLowerCase().indexOf(filter) > -1 ? "" : "none";
+      }
+    }
+
+  </script>
+</body>
+</html>
