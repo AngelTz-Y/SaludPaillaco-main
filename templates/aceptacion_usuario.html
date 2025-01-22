@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aceptación de Usuario</title>
+</head>
+<body>
+    <h1>Aceptación de Usuario</h1>
+    
+    {% if error %}
+        <div style="color: red;">{{ error }}</div>
+    {% endif %}
+    
+    <table>
+        <thead>
+            <tr>
+                <th>Nombre</th>
+                <th>RUT</th>
+                <th>Acción</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for perfil in usuarios_en_espera %}
+            <tr>
+                <td>{{ perfil.user.first_name }} {{ perfil.user.last_name }}</td>
+                <td>{{ perfil.rut }}</td>
+                <td>
+                    <form method="POST">
+                        {% csrf_token %}
+                        <input type="hidden" name="rut_aceptado" value="{{ perfil.rut }}">
+                        <button type="submit">Aceptar Usuario</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    
+</body>
+</html>

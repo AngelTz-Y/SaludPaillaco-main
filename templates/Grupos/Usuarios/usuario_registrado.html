@@ -1,0 +1,72 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bienvenido Usuario Registrado</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            width: 80%;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: white;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #4CAF50;
+        }
+        p {
+            font-size: 1.2em;
+            color: #333;
+        }
+        .button-container {
+            margin-top: 20px;
+        }
+        .button {
+            padding: 10px 20px;
+            margin-right: 10px;
+            background-color: #4CAF50;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-size: 1em;
+        }
+        .button:hover {
+            background-color: #45a049;
+        }
+        .alert {
+            padding: 10px;
+            background-color: #f9ed69;
+            color: #856404;
+            border: 1px solid #f1e5a3;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Bienvenido, {{ user.username }}!</h1>
+        <p>¡Hola, <strong>{{ user.username }}</strong>! Has iniciado sesión exitosamente como usuario registrado. Nos alegra tenerte con nosotros.</p>
+
+        <div class="alert">
+            <p><strong>Recuerda:</strong> Siempre puedes acceder a tu perfil y actualizar tus datos cuando lo necesites.</p>
+        </div>
+
+        <div class="button-container">
+            <a href="" class="button">Ver Mi Perfil</a>
+            <a href="" class="button">Cerrar Sesión</a>
+        </div>
+
+        <p>Si tienes alguna pregunta o necesitas ayuda, no dudes en ponerte en contacto con nosotros a través de la sección de ayuda.</p>
+    </div>
+</body>
+</html>

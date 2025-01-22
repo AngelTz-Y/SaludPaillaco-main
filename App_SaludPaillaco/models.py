@@ -12,7 +12,9 @@ class PerfilUsuario(models.Model):
     rut = models.CharField(max_length=12)
     telefono = models.CharField(max_length=15)
     profesion = models.ForeignKey(Profesion_Oficio, on_delete=models.SET_NULL, null=True)
-    aprobado = models.BooleanField(default=False)  # Campo para indicar si el usuario está aprobado
+    aprobado = models.BooleanField(default=False)
+    numero_espera = models.PositiveIntegerField(null=True, blank=True)  # Número secuencial
 
     def __str__(self):
         return self.user.username
+
