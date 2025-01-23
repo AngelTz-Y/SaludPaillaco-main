@@ -4,15 +4,202 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Aceptación de Usuario</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #545454;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+            font-size: 2rem;
+        }
+
+        table {
+            width: 100%;
+            max-width: 800px; 
+            margin: 0 auto;
+            border-collapse: collapse;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            overflow: hidden;
+            background-color: white;
+        }
+
+        th, td {
+            padding: 10px;
+            text-align: left;
+            font-size: 14px;
+        }
+
+        th {
+            background-color: #007bff;
+            color: white;
+            font-weight: 500;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+
+        .checkbox {
+            display: block;
+            position: relative;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .checkbox input {
+            cursor: none;
+            position: absolute;
+            pointer-events: none;
+            opacity: 0;
+            height: 0;
+            width: 0;
+        }
+
+        .checkmark {
+            --sizer: 24px;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            stroke-width: 6;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            z-index: 1;
+            border-radius: 999px;
+            transition: all 0.3s ease;
+        }
+
+        .checkmark,
+        .checkmark path {
+            transition: all 0.5s linear;
+        }
+
+        .checkbox input:checked ~ .checkmark {
+            fill: #28a745;
+            stroke: #fff;
+        }
+
+        .checkbox input:checked ~ .checkmark path {
+            animation: checked_success 0.8s linear;
+            stroke-dashoffset: 162.6;
+            stroke-dasharray: 0 162.6 28 134.6;
+        }
+
+        .checkbox input:where(:not(:checked)) ~ .checkmark {
+            fill: #fff;
+            stroke: #007bff;
+        }
+
+        .checkbox input:where(:not(:checked)) ~ .checkmark path {
+            stroke-dashoffset: 162.6;
+            stroke-dasharray: 0 200 158 134.6;
+        }
+
+        .sizer {
+            width: var(--sizer);
+            height: var(--sizer);
+        }
+
+        .modal-content {
+            border-radius: 10px;
+            background-color: #fff;
+        }
+
+        .modal-header {
+            border-bottom: 1px solid #f1f1f1;
+            background-color: #007bff;
+            color: white;
+        }
+
+        .modal-body {
+            font-size: 14px;
+            color: #555;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-footer button {
+            font-weight: 600;
+        }
+
+        .modal-body p {
+            font-size: 16px;
+            font-weight: 500;
+        }
+
+        .modal-footer button {
+            font-size: 16px;
+        }
+
+        .modal-body .important {
+            font-size: 18px;
+            font-weight: bold;
+            color: #007bff;
+        }
+
+        .modal-body .warning-icon {
+            font-size: 40px;
+            color: #ffcc00;
+            animation: pulse 1.5s infinite;
+        }
+
+        .modal-body .check-icon {
+            font-size: 30px;
+            color: #28a745;
+        }
+
+        /* Animación de advertencia */
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.2);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        /* Responsividad para pantallas pequeñas */
+        @media (max-width: 600px) {
+            table {
+                width: 100%;
+            }
+            th, td {
+                font-size: 12px;
+            }
+            h1 {
+                font-size: 24px;
+            }
+        }
+    </style>
 </head>
 <body>
     <h1>Aceptación de Usuario</h1>
     
     {% if error %}
-        <div style="color: red;">{{ error }}</div>
+        <div style="color: red; text-align: center;">{{ error }}</div>
     {% endif %}
     
-    <table>
+    <table class="table table-bordered table-striped">
         <thead>
             <tr>
                 <th>Nombre</th>
@@ -26,16 +213,83 @@
                 <td>{{ perfil.user.first_name }} {{ perfil.user.last_name }}</td>
                 <td>{{ perfil.rut }}</td>
                 <td>
-                    <form method="POST">
-                        {% csrf_token %}
-                        <input type="hidden" name="rut_aceptado" value="{{ perfil.rut }}">
-                        <button type="submit">Aceptar Usuario</button>
-                    </form>
+                    <label class="checkbox">
+                        <input type="checkbox" id="checkbox-{{ perfil.rut }}" onclick="handleCheckbox('{{ perfil.rut }}', '{{ perfil.user.first_name }} {{ perfil.user.last_name }}')">
+                        <svg viewBox="0 0 44 44" class="sizer checkmark">
+                            <path
+                                d="M14,24 L21,31 L39.7428882,11.5937758 C35.2809627,6.53125861 30.0333333,4 24,4 C12.95,4 4,12.95 4,24 C4,35.05 12.95,44 24,44 C35.05,44 44,35.05 44,24 C44,19.3 42.5809627,15.1645919 39.7428882,11.5937758"
+                                transform="translate(-2.000000, -2.000000)"></path>
+                        </svg>
+                    </label>
                 </td>
             </tr>
             {% endfor %}
         </tbody>
     </table>
     
+    <!-- Modal -->
+    <div class="modal fade" id="confirmModal" tabindex="-1" aria-labelledby="confirmModalLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="confirmModalLabel">Confirmar aceptación</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" onclick="resetCheckbox()"></button>
+                </div>
+                <div class="modal-body text-center">
+                    <div class="warning-icon">
+                        <i class="bi bi-exclamation-triangle-fill"></i>
+                    </div>
+                    <p><strong>Advertencia:</strong> Al hacer clic en "Aceptar", el usuario <strong id="userName"></strong> con RUT <strong id="userRUT"></strong> obtendrá acceso a la intranet. Este acceso es irreversible.</p>
+                    <p class="important">¿Confirmas este acceso?</p>
+                    <div>
+                        <p><i class="bi bi-check-circle-fill check-icon"></i> Acceso completo a funcionalidades internas</p>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <form method="POST" id="acceptForm">
+                        {% csrf_token %}
+                        <input type="hidden" name="rut_aceptado" id="hiddenRUT">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" onclick="resetCheckbox()">Cancelar</button>
+                        <button type="submit" class="btn btn-success">Aceptar</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let currentCheckbox = null;
+
+        // Función para manejar el checkbox y mostrar el modal
+        function handleCheckbox(rut, name) {
+            currentCheckbox = document.querySelector(`#checkbox-${rut}`);
+            document.getElementById('userName').textContent = name;
+            document.getElementById('userRUT').textContent = rut;
+            document.getElementById('hiddenRUT').value = rut;
+            const modal = new bootstrap.Modal(document.getElementById('confirmModal'));
+            modal.show();
+        }
+
+        // Función para resetear el checkbox cuando el modal se cierra
+        function resetCheckbox() {
+            if (currentCheckbox) {
+                currentCheckbox.checked = false;
+                currentCheckbox = null;
+            }
+        }
+
+        // Evento para desmarcar el checkbox si el clic es fuera del modal
+        document.querySelector('#confirmModal').addEventListener('click', function(event) {
+            const modalContent = document.querySelector('.modal-content');
+            if (!modalContent.contains(event.target)) {
+                if (currentCheckbox) {
+                    currentCheckbox.checked = false;
+                    currentCheckbox = null;
+                }
+            }
+        });
+    </script>
 </body>
 </html>
