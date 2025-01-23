@@ -25,6 +25,9 @@ urlpatterns = [
     path('registro_exitoso/', registro_exitoso, name='registro_exitoso'),
     path('aceptacion_usuario/', aceptacion_usuario, name='aceptacion_usuario'),
     path('Panel_Administrador/', panel_administrador, name='panel_administrador'),
+    path('cargar-asistencia-varios/', cargar_asistencia_varios, name='cargar_asistencia_varios'),
+    path('cargar_asistencia/', cargar_asistencia_uno, name='cargar_asistencia'),
+    path('descargar_asistencia/', descargar_asistencia, name='descargar_asistencia'),
     
     
     

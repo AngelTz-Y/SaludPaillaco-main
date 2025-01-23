@@ -19,6 +19,15 @@ class PerfilUsuario(models.Model):
         return self.user.username
     
     
+class Asistencia(models.Model):
+    perfil = models.ForeignKey(PerfilUsuario, on_delete=models.CASCADE)
+    fecha = models.DateField()
+    horas_trabajadas = models.DecimalField(max_digits=5, decimal_places=2)
+
+    def __str__(self):
+        return f"Asistencia de {self.perfil.user.username} en {self.fecha} ({self.horas_trabajadas} horas)"
+    
+    
 
 
 
