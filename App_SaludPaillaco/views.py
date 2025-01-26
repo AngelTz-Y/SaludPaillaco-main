@@ -1,19 +1,30 @@
-from django.contrib.auth.models import User
+# Importaciones de Django (Incluido con Django, no requiere instalación adicional)
+from django.contrib.auth.models import User, Group
 from django.contrib.auth import authenticate, login
 from django.shortcuts import render, redirect
-from .models import PerfilUsuario, Profesion_Oficio
-from django.contrib.auth.models import Group
-import pandas as pd
-from django.http import JsonResponse, HttpResponse
-from django.views.decorators.csrf import csrf_exempt
-from .models import PerfilUsuario, Asistencia
-from datetime import datetime
-import locale
-import pandas as pd
-from django.http import HttpResponse
-from openpyxl import Workbook
-from openpyxl.styles import Alignment, Font
-from .models import Asistencia
+from django.http import HttpResponse, Http404
+from django.contrib.auth.decorators import login_required
+
+# Importaciones para manejo de modelos personalizados (Incluido en tu proyecto)
+from .models import *
+
+# Manejo de archivos Excel con openpyxl
+# Instalación en Windows: pip install openpyxl
+# Instalación en Ubuntu 24: sudo apt install python3-openpyxl
+from openpyxl.styles import *
+
+# Creación y manipulación de PDFs
+# Lectura de PDFs con pdfplumber
+# Instalación en Windows: pip install pdfplumber
+# Instalación en Ubuntu 24: sudo apt install python3-pdfplumber
+import pdfplumber
+
+
+# Manejo de configuraciones y rutas en Django (Incluido con Django)
+import os
+from django.conf import settings
+
+
 
 # Create your views here.
 def inicio(request):
@@ -65,10 +76,6 @@ def inicio(request):
     # Si la solicitud es GET, mostrar la página de inicio de sesión
     return render(request, 'inicio.html')
 
-from django.shortcuts import render, redirect
-from django.contrib.auth.models import User, Group
-from django.contrib.auth import authenticate, login
-from .models import PerfilUsuario, Profesion_Oficio
 
 def registrarse(request):
     if request.method == 'POST':
@@ -192,7 +199,7 @@ meses = {
     "Noviembre": 11, "Diciembre": 12
 }
 
-meses_esp = {
+meses_espanol = {
     "January": "Enero",
     "February": "Febrero",
     "March": "Marzo",
@@ -207,192 +214,778 @@ meses_esp = {
     "December": "Diciembre",
 }
 
+
+meses_espanol_a_numero = {
+    'enero': 1,
+    'febrero': 2,
+    'marzo': 3,
+    'abril': 4,
+    'mayo': 5,
+    'junio': 6,
+    'julio': 7,
+    'agosto': 8,
+    'septiembre': 9,
+    'octubre': 10,
+    'noviembre': 11,
+    'diciembre': 12
+}
+
+
+
+
+
+meses = [
+    'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 
+    'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'
+]
+
+# Lista de meses
+meses = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre']
+
+
+meses = {
+    
+    1: "enero", 2: "febrero", 3: "marzo", 4: "abril", 5: "mayo", 6: "junio",
+    7: "julio", 8: "agosto", 9: "septiembre", 10: "octubre", 11: "noviembre", 12: "diciembre"
+}
+
 def cargar_asistencia_uno(request):
-    if request.method == 'POST' and request.FILES['excel_file']:
-        excel_file = request.FILES['excel_file']
-        
-        # Leer el archivo Excel
-        df = pd.read_excel(excel_file)
-        
-        # Crear lista de registros procesados para generar el nuevo Excel
-        registros = []
-        
-        # Iterar sobre cada fila del archivo
-        for index, row in df.iterrows():
-            # Normalizar el RUT (eliminar guiones)
-            rut = str(row['RUT']).replace("-", "").strip()
-            
-            try:
-                # Buscar el perfil del usuario por RUT (sin guion)
-                perfil = PerfilUsuario.objects.get(rut=rut)
-                
-                # Leer Mes (nombre del mes como texto), Día y Horas trabajadas
-                mes_texto = row['Mes']
-                dia = int(row['Dia'])  # Convertir 'Dia' a entero
-                horas_trabajadas = row['Horas Trabajadas']
-                
-                # Convertir el nombre del mes a número usando el diccionario
-                if mes_texto in meses:
-                    mes = meses[mes_texto]
-                else:
-                    print(f"Mes desconocido: {mes_texto}")
-                    continue  # Saltar la fila si el mes no es válido
-                
-                # Crear fecha (usando el año actual)
-                fecha = datetime(datetime.now().year, mes, dia)
-                
-                # Guardar la asistencia en la base de datos
-                Asistencia.objects.create(perfil=perfil, fecha=fecha, horas_trabajadas=horas_trabajadas)
+    pdf_file = None
+    error_message = None
 
-                # Añadir el registro procesado a la lista
-                registros.append({
-                    "RUT": rut,
-                    "Mes": mes_texto,
-                    "Dia": dia,
-                    "Horas Trabajadas": horas_trabajadas,
-                    "Fecha": fecha
-                })
-            
-            except PerfilUsuario.DoesNotExist:
-                # Si el RUT no existe en la base de datos
-                print(f"Funcionario con RUT {rut} no encontrado.")
-                continue  # Continuar con la siguiente fila
-        
-        # Generar un DataFrame de pandas con los registros procesados
-        if registros:
-            df_resultado = pd.DataFrame(registros)
-            
-            # Crear un archivo Excel en memoria
-            response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-            response['Content-Disposition'] = 'attachment; filename=asistencia_procesada.xlsx'
-            
-            # Escribir el DataFrame a la respuesta HTTP (en formato Excel)
-            with pd.ExcelWriter(response, engine='openpyxl') as writer:
-                df_resultado.to_excel(writer, index=False, sheet_name='Asistencia')
-            
-            return response
-        
-        return HttpResponse("Archivo procesado exitosamente, pero no se generaron registros.")
+    if request.method == 'POST' and request.FILES.get('pdf_file'):
+        pdf_file = request.FILES['pdf_file']
 
-    return render(request, 'cargar_asistencia.html')
+        # Obtener mes y año del formulario
+        mes = request.POST.get('mes')
+        año = request.POST.get('año')
 
+        # Verificar el valor del mes (para depuración)
+        print(f"Mes recibido: {mes}")  # Debugging: Muestra el valor de mes recibido en los logs
 
-def descargar_asistencia(request):
-    # Obtener todos los registros de asistencia desde la base de datos
-    asistencias = Asistencia.objects.all().select_related('perfil')
+        # Validación de mes y año
+        if not mes or not año:
+            error_message = "Mes y año son requeridos."
+            return render(request, 'cargar_asistencia.html', {'error_message': error_message})
 
-    # Crear una lista con los registros para el archivo Excel
-    registros = []
-    for asistencia in asistencias:
-        # Convertir el mes en inglés a español
-        mes_espanol = meses_esp.get(asistencia.fecha.strftime('%B'), asistencia.fecha.strftime('%B'))
-
-        registros.append({
-            "RUT": asistencia.perfil.rut,
-            "Nombre": asistencia.perfil.user.get_full_name(),
-            "Mes": mes_espanol,  # Nombre del mes en español
-            "Dia": asistencia.fecha.day,
-            "Horas Trabajadas": asistencia.horas_trabajadas,
-            "Fecha": asistencia.fecha.strftime('%Y-%m-%d')  # Fecha en formato YYYY-MM-DD
-        })
-
-    # Si hay registros, crear el archivo Excel
-    if registros:
-        # Crear un DataFrame con los registros
-        df = pd.DataFrame(registros)
-        
-        # Crear una respuesta HTTP con tipo de contenido para un archivo Excel
-        response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-        response['Content-Disposition'] = 'attachment; filename=asistencia_registros.xlsx'
-
-        # Crear un libro de trabajo de Excel con openpyxl
-        wb = Workbook()
-        ws = wb.active
-        ws.title = "Asistencia"
-
-        # Escribir los encabezados
-        encabezados = df.columns.tolist()
-        for col_num, col_name in enumerate(encabezados, 1):
-            cell = ws.cell(row=1, column=col_num, value=col_name)
-            cell.font = Font(bold=True)  # Negritas para los encabezados
-            cell.alignment = Alignment(horizontal="center", vertical="center")  # Centrar encabezados
-
-        # Escribir los registros de la tabla
-        for row_num, row in enumerate(df.values, 2):
-            for col_num, value in enumerate(row, 1):
-                cell = ws.cell(row=row_num, column=col_num, value=value)
-                cell.alignment = Alignment(horizontal="center", vertical="center")  # Centrar celdas
-
-                # Aplicar negritas al mes
-                if col_num == 3:  # Columna 'Mes'
-                    cell.font = Font(bold=True)  # Negritas en los meses
-
-        # Ajustar el tamaño de las columnas para que el texto se vea bien
-        for col in ws.columns:
-            max_length = 0
-            column = col[0].column_letter  # Obtener la letra de la columna
-            for cell in col:
-                try:
-                    if len(str(cell.value)) > max_length:
-                        max_length = len(cell.value)
-                except:
-                    pass
-            adjusted_width = (max_length + 2)
-            ws.column_dimensions[column].width = adjusted_width
-
-        # Guardar el archivo Excel en la respuesta
-        wb.save(response)
-        
-        return response
-    else:
-        return HttpResponse("No se encontraron registros de asistencia para descargar.")
-
-
-
-@csrf_exempt  # Evita problemas con CSRF (solo en desarrollo)
-def cargar_asistencia_varios(request):
-    if request.method == 'POST' and request.FILES.get('file'):
+        # Validar que el mes sea un número entre 1 y 12
         try:
-            # Leer el archivo Excel
-            file = request.FILES['file']
-            df = pd.read_excel(file)
+            mes_num = int(mes)
+            if mes_num < 1 or mes_num > 12:
+                raise ValueError("Mes fuera de rango")
+        except ValueError:
+            error_message = "Mes no válido. Debe ser un número entre 1 y 12."
+            return render(request, 'cargar_asistencia.html', {'error_message': error_message})
 
-            # Procesar cada fila del DataFrame (cada fila es un registro de asistencia)
-            for index, row in df.iterrows():
-                rut = row['RUT']  # RUT del trabajador
-                try:
-                    perfil = PerfilUsuario.objects.get(rut=rut)
-                    mes = row['Mes']  # Mes (puede ser número o nombre)
-                    dia = row['Dia']  # Día
-                    horas_trabajadas = row['Horas Trabajadas']  # Horas trabajadas
+        try:
+            # Leer el PDF para extraer el RUT y demás información
+            with pdfplumber.open(pdf_file) as pdf:
+                texto_completo = ""
+                for pagina in pdf.pages:
+                    texto_completo += pagina.extract_text()
 
-                    # Convertir la fecha
-                    if isinstance(mes, int) and 1 <= mes <= 12:
-                        fecha = datetime(datetime.now().year, mes, dia)  # Año actual
-                    else:
-                        try:
-                            fecha = datetime.strptime(f"{dia}-{mes}-2025", "%d-%B-%Y")
-                        except ValueError:
-                            print(f"Fecha no válida en el archivo para el RUT {rut}.")
-                            continue
+            # Extraer el RUT del encabezado
+            rut_linea = next((linea for linea in texto_completo.splitlines() if "RUT:" in linea), None)
+            if rut_linea:
+                rut = rut_linea.split(":")[1].strip().replace("-", "").replace(".", "")
+            else:
+                error_message = "RUT no encontrado en el PDF."
+                return render(request, 'cargar_asistencia.html', {'error_message': error_message})
 
-                    # Registrar la asistencia
-                    Asistencia.objects.create(perfil=perfil, fecha=fecha, horas_trabajadas=horas_trabajadas)
+            # Asociar el PDF al perfil correspondiente
+            try:
+                perfil = PerfilUsuario.objects.get(rut=rut)
 
-                except PerfilUsuario.DoesNotExist:
-                    print(f"Funcionario con RUT {rut} no encontrado.")
+                # Obtener el nombre del mes (como string)
+                mes_nombre = meses.get(mes_num, None)
+                if not mes_nombre:
+                    error_message = "Mes no válido."
+                    return render(request, 'cargar_asistencia.html', {'error_message': error_message})
 
-            return JsonResponse({'status': 'success', 'message': 'Asistencias registradas correctamente.'})
+                # Crear el directorio basado en el RUT, año y nombre del mes
+                directorio_pdf = os.path.join(settings.MEDIA_ROOT, 'asistencias_pdfs', rut, str(año), mes_nombre)
+                os.makedirs(directorio_pdf, exist_ok=True)  # Crear directorio si no existe
+
+                # Guardar el PDF en el servidor en el directorio específico del funcionario
+                pdf_path = os.path.join(directorio_pdf, pdf_file.name)
+                with open(pdf_path, 'wb') as f:
+                    for chunk in pdf_file.chunks():
+                        f.write(chunk)
+
+                # Crear o actualizar la asistencia para el mes y año
+                asistencia, created = AsistenciaMes.objects.get_or_create(
+                    perfil=perfil,
+                    mes=mes_num,  # Usamos el número del mes
+                    año=año
+                )
+
+                # Actualizar el archivo PDF en el modelo AsistenciaMes
+                asistencia.pdf_asistencia = f'asistencias_pdfs/{rut}/{año}/{mes_nombre}/{pdf_file.name}'
+                asistencia.save()
+
+                # También actualizar el PDF en el perfil (PerfilUsuario)
+                perfil.pdf_asistencia = f'asistencias_pdfs/{rut}/{año}/{mes_nombre}/{pdf_file.name}'
+                perfil.save()
+
+                # Si todo va bien, devolver el archivo PDF para la descarga
+                with open(pdf_path, 'rb') as f:
+                    pdf_data = f.read()
+
+                pdf_response = HttpResponse(pdf_data, content_type='application/pdf')
+                pdf_response['Content-Disposition'] = f'attachment; filename={pdf_file.name}'
+
+                return pdf_response
+
+            except PerfilUsuario.DoesNotExist:
+                error_message = f"Perfil no encontrado para el RUT {rut}. El PDF no se asoció."
+                return render(request, 'cargar_asistencia.html', {'error_message': error_message})
 
         except Exception as e:
-            return JsonResponse({'status': 'error', 'message': str(e)})
+            error_message = f"Error al procesar el PDF: {str(e)}"
+            return render(request, 'cargar_asistencia.html', {'error_message': error_message})
 
-    return HttpResponse("Método no permitido", status=405)
+    return render(request, 'cargar_asistencia.html', {'pdf_file': pdf_file, 'error_message': error_message})
 
+
+
+
+
+def descargar_registro_asistencia(request):
+    mensaje = None
+    pdf_encontrado = False
+    pdf_url = None
+
+    if request.method == 'POST':
+        # Obtener los datos del formulario
+        usuario_id = request.POST.get('usuario')
+        mes = int(request.POST.get('mes'))  # Asegurarnos de que el mes sea un número entero
+
+        # Verificar que los campos estén presentes
+        if not usuario_id or not mes:
+            mensaje = "Todos los campos son requeridos."
+            return render(request, 'seleccionar_usuario.html', {'mensaje': mensaje})
+
+        # Obtener el perfil de usuario
+        try:
+            perfil = PerfilUsuario.objects.get(id=usuario_id)
+        except PerfilUsuario.DoesNotExist:
+            mensaje = "El usuario seleccionado no existe."
+            return render(request, 'seleccionar_usuario.html', {'mensaje': mensaje})
+
+        # Intentar buscar la asistencia para ese usuario y mes
+        try:
+            asistencia = AsistenciaMes.objects.get(perfil=perfil, mes=mes)
+            pdf_url = asistencia.pdf_asistencia.url if asistencia.pdf_asistencia else None
+            if pdf_url:
+                pdf_encontrado = True
+            else:
+                mensaje = f"No se ha encontrado el archivo PDF para el mes {dict(AsistenciaMes.MES_CHOICES).get(mes)}."
+        except AsistenciaMes.DoesNotExist:
+            mensaje = f"No se ha encontrado el archivo PDF para el mes {dict(AsistenciaMes.MES_CHOICES).get(mes)}."
+
+        # Si el PDF está encontrado, proceder con la descarga
+        if pdf_encontrado:
+            pdf_path = asistencia.pdf_asistencia.path  # Ruta completa al archivo en el sistema de archivos
+            with open(pdf_path, 'rb') as pdf_file:
+                response = HttpResponse(pdf_file.read(), content_type='application/pdf')
+                response['Content-Disposition'] = f'attachment; filename="{os.path.basename(pdf_path)}"'
+                return response
+
+        # Si no se encuentra el archivo, renderizamos el mensaje de error
+        return render(request, 'seleccionar_usuario.html', {
+            'mensaje': mensaje,
+            'usuarios': PerfilUsuario.objects.all()
+        })
+
+    # Si no es POST, simplemente renderizamos el formulario
+    return render(request, 'seleccionar_usuario.html', {
+        'usuarios': PerfilUsuario.objects.all()
+    })
+    
+
+@login_required  # Asegura que solo usuarios autenticados puedan acceder
+def descargar_asistencia(request, rut, mes, año):
+    try:
+        # Verificar si el usuario actual tiene acceso al perfil de este RUT
+        perfil = PerfilUsuario.objects.get(rut=rut)
+        
+        # Verifica que el usuario autenticado sea el mismo que el dueño del perfil
+        if request.user != perfil.user:
+            raise PermissionError("No tienes permiso para acceder a este archivo.")
+
+        # Obtenemos el nombre del mes de la misma forma que antes
+        meses = {
+            1: "enero", 2: "febrero", 3: "marzo", 4: "abril", 5: "mayo", 6: "junio",
+            7: "julio", 8: "agosto", 9: "septiembre", 10: "octubre", 11: "noviembre", 12: "diciembre"
+        }
+        mes_nombre = meses.get(int(mes), None)
+        if not mes_nombre:
+            raise Http404("Mes no válido.")
+        
+        # Construir la ruta completa al archivo PDF
+        directorio_pdf = os.path.join(settings.MEDIA_ROOT, 'asistencias_pdfs', perfil.nombre_completo.lower().replace(" ", "_"), str(año), mes_nombre)
+        pdf_path = os.path.join(directorio_pdf, f"{rut}_{mes_nombre}_{año}.pdf")  # El nombre del archivo podría incluir el RUT, mes y año
+        
+        # Verificar si el archivo existe
+        if not os.path.exists(pdf_path):
+            raise Http404("Archivo no encontrado.")
+        
+        # Si el archivo existe, devolverlo como respuesta HTTP para descarga
+        with open(pdf_path, 'rb') as f:
+            pdf_data = f.read()
+
+        response = HttpResponse(pdf_data, content_type='application/pdf')
+        response['Content-Disposition'] = f'attachment; filename={os.path.basename(pdf_path)}'
+        return response
+
+    except PerfilUsuario.DoesNotExist:
+        raise Http404("Perfil no encontrado.")
+    except PermissionError as e:
+        return HttpResponse(str(e), status=403)  # Respuesta con error 403 si no tiene permiso
+    except Exception as e:
+        return HttpResponse(f"Error al procesar la descarga: {str(e)}", status=500)
+    
+    
+    
+@login_required
+def descargar_pdf_perfil(request):
+    try:
+        # Obtener el perfil del usuario autenticado
+        perfil = request.user.perfilusuario
+
+        # Verificar que el PDF esté configurado
+        if not perfil.pdf_asistencia:
+            raise Http404("No tienes un archivo asociado para descargar.")
+
+        # Ruta completa al archivo
+        ruta_pdf = perfil.pdf_asistencia.path
+
+        # Verificar si el archivo existe en el servidor
+        if not os.path.exists(ruta_pdf):
+            raise Http404("El archivo no existe en el servidor.")
+
+        # Enviar el archivo como respuesta de descarga
+        with open(ruta_pdf, 'rb') as archivo:
+            response = HttpResponse(archivo.read(), content_type='application/pdf')
+            response['Content-Disposition'] = f'attachment; filename="{os.path.basename(ruta_pdf)}"'
+            return response
+
+    except PerfilUsuario.DoesNotExist:
+        raise Http404("No se encontró el perfil asociado a este usuario.")
+    except Exception as e:
+        return HttpResponse(f"Error: {str(e)}", status=500)
 
 
 
 
 def panel_administrador(request):
     return render(request, 'Grupos/Administrador/panel_administrador.html')
-    
+
+
+
+
+import pandas as pd
+from django.shortcuts import render
+from django.http import HttpResponse
+from .forms import ExcelUploadForm
+from .models import Asistencia
+
+# Vista para cargar y guardar los datos del Excel
+def cargar_excel(request):
+    if request.method == 'POST' and request.FILES['excel_file']:
+        excel_file = request.FILES['excel_file']
+        
+        # Leer el archivo Excel usando pandas
+        df = pd.read_excel(excel_file)
+
+        # Crear una lista para almacenar las instancias de Asistencia antes de guardarlas
+        asistencia_list = []
+
+        # Recorrer las filas del DataFrame y guardar los datos en la base de datos
+        for index, row in df.iterrows():
+            try:
+                # Convertir la fecha al formato adecuado YYYY-MM-DD si no está vacía
+                if pd.notna(row['fecha']):
+                    try:
+                        fecha = datetime.strptime(row['fecha'], '%d-%m-%Y').date()
+                    except ValueError:
+                        fecha = None  # Si la fecha tiene un formato incorrecto, asignamos None
+                else:
+                    fecha = None  # Si la fecha está vacía, la dejamos vacía
+
+                # Verificar si cada campo está vacío y dejarlo vacío si es necesario
+                ac = row['ac'] if pd.notna(row['ac']) else None
+                rut = row['rut'] if pd.notna(row['rut']) else None  # Asegurarse de que el RUT no esté vacío
+                nombre = row['nombre'] if pd.notna(row['nombre']) else ''
+                dpto = row['dpto'] if pd.notna(row['dpto']) else ''
+                mes = row['mes'] if pd.notna(row['mes']) else ''
+                ano = row['ano'] if pd.notna(row['ano']) else ''
+                marcaciones = row['marcaciones'] if pd.notna(row['marcaciones']) else ''
+                observaciones = row['observaciones'] if pd.notna(row['observaciones']) else ''
+
+                # Validación: Si el RUT es obligatorio, comprobamos si está vacío
+                if not rut:
+                    print(f"Fila {index}: El RUT está vacío, asociando los datos al AC {ac}.")
+                    # Si no hay RUT, pero sí hay AC, buscamos el registro con el AC
+                    if ac:
+                        # Aquí puedes decidir cómo asociar el AC a un registro existente o crear uno nuevo
+                        # Si el 'ac' es único, puedes buscarlo y asociarlo con la fila
+                        asistencia = Asistencia(
+                            ac=ac,  # Asociar el valor de AC si el RUT no existe
+                            rut=None,  # Si no hay RUT, dejamos este campo en blanco o como None
+                            nombre=nombre,
+                            dpto=dpto,
+                            mes=mes,
+                            ano=ano,
+                            fecha=fecha,
+                            marcaciones=marcaciones,
+                            observaciones=observaciones,
+                        )
+                        asistencia_list.append(asistencia)
+                    else:
+                        print(f"Fila {index}: El RUT y el AC están vacíos, saltando esta fila.")
+                        continue  # Si tampoco hay AC, omitimos la fila
+                else:
+                    # Si el RUT existe, asociamos los datos al RUT existente
+                    asistencia = Asistencia(
+                        ac=ac,  # Asociar AC si está presente
+                        rut=rut,  # Asociamos el RUT
+                        nombre=nombre,
+                        dpto=dpto,
+                        mes=mes,
+                        ano=ano,
+                        fecha=fecha,
+                        marcaciones=marcaciones,
+                        observaciones=observaciones,
+                    )
+                    asistencia_list.append(asistencia)  # Añadir la instancia a la lista
+
+            except Exception as e:
+                print(f"Error al procesar la fila {index}: {e}")
+
+        # Guardar todas las instancias de una sola vez en la base de datos
+        if asistencia_list:
+            Asistencia.objects.bulk_create(asistencia_list)
+            print(f"{len(asistencia_list)} registros guardados correctamente.")
+        
+        # Respuesta después de procesar el archivo
+        return HttpResponse("Archivo cargado y datos guardados correctamente.")
+
+    # Formulario para cargar el archivo Excel
+    form = ExcelUploadForm()
+
+    return render(request, 'cargar_excel.html', {'form': form})
+
+
+
+
+from django.http import HttpResponse
+from xhtml2pdf import pisa
+from datetime import datetime
+from .models import Asistencia
+
+from datetime import datetime
+from io import BytesIO
+from django.http import HttpResponse
+from xhtml2pdf import pisa
+from django.templatetags.static import static
+
+
+import base64
+from django.http import HttpResponse
+from io import BytesIO
+from reportlab.lib.pagesizes import letter
+from reportlab.pdfgen import canvas
+from django.conf import settings
+from datetime import datetime
+import os
+
+def generar_pdf(request):
+    # Obtener todos los registros de asistencia
+    asistencia_records = Asistencia.objects.all()
+
+    # Obtener la fecha y hora actual
+    fecha_emision = datetime.now()
+    fecha_actual = fecha_emision.strftime('%d-%m-%Y')
+    hora_emision = fecha_emision.strftime('%H:%M:%S')
+
+    # Traducir el mes al español
+    meses_espanol = {
+        'January': 'Enero', 'February': 'Febrero', 'March': 'Marzo',
+        'April': 'Abril', 'May': 'Mayo', 'June': 'Junio', 'July': 'Julio',
+        'August': 'Agosto', 'September': 'Septiembre', 'October': 'Octubre',
+        'November': 'Noviembre', 'December': 'Diciembre'
+    }
+    mes_actual = meses_espanol[fecha_emision.strftime('%B')]
+
+    # Inicialización de la respuesta HTTP
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = 'attachment; filename="informe_asistencia.pdf"'
+
+    # Convertir la imagen a Base64
+    imagen_path = os.path.join(settings.BASE_DIR, 'static', 'img', 'Cesfaaaam.png')
+
+    # Convertir imagen a base64
+    with open(imagen_path, "rb") as image_file:
+        encoded_image = base64.b64encode(image_file.read()).decode('utf-8')
+
+    # Crear la imagen en formato base64 para el HTML
+    imagen_base64 = f"data:image/png;base64,{encoded_image}"
+
+    # Plantilla HTML base para el PDF
+    html_content = f"""
+    <html>
+        <style>
+            body {{
+                font-family: Arial, sans-serif;
+                margin: 0;
+                padding: 0;
+            }}
+            h1 {{
+                text-align: center;
+                color: #0044cc;
+                border-bottom: 2px solid #0044cc;
+                margin-bottom: 20px;
+            }}
+            h2 {{
+                text-align: center;
+                font-size: 18px;
+            }}
+            table {{
+                width: 100%;
+                border-collapse: collapse;
+                margin-top: 10px;
+            }}
+            th, td {{
+                text-align: center;
+                border: 1px solid #ddd;
+            }}
+            th {{
+                background-color: #f2f2f2;
+                font-weight: bold;
+            }}
+            td {{
+                font-size: 12px;
+            }}
+            .header {{
+                display: flex;
+                justify-content: space-between;
+                margin-bottom: 20px;
+            }}
+            .header .izquierda {{
+                text-align: left;
+                font-size: 10px;
+            }}
+            .header .derecha {{
+                text-align: right;
+                font-size: 10px;
+            }}
+            .mes {{
+                text-align: center;
+                font-size: 14px;
+                font-weight: bold;
+            }}
+            .funcionario-info {{
+                text-align: center;
+                font-size: 12px;
+                margin-top: 20px;
+            }}
+            .logo {{
+                text-align: center;
+                margin-top: 10px;
+            }}
+            .logo img {{
+                width: 150px;
+            }}
+        </style>
+        <body>
+    """
+
+    # Filtrar registros por funcionario y crear HTML para cada uno
+    funcionarios = asistencia_records.values('nombre', 'rut').distinct()
+
+    for funcionario in funcionarios:
+        nombre_funcionario = funcionario['nombre']
+        rut_funcionario = funcionario['rut']
+        registros_funcionario = asistencia_records.filter(nombre=nombre_funcionario)
+
+        # Insertar encabezado antes de cada funcionario
+        html_content += f"""
+            <div class="header">
+                <div class="logo">
+                    <img src="{imagen_base64}" alt="Logo" style="width: 50px; height: auto;">
+                </div>
+                <div class="izquierda">
+                    <p><strong>MUNICIPALIDAD DE PAILLACO</strong></p>
+                    <p><strong>DEPARTAMENTO DE SALUD</strong></p>
+                </div>
+                <div class="derecha">
+                    <p><strong>Fecha de Emisión:</strong> {fecha_actual}</p>
+                    <p><strong>Hora de Emisión:</strong> {hora_emision}</p>
+                </div>
+            </div>
+
+            <h1>INFORME DE ASISTENCIA DE PERSONAL</h1>
+
+            <div class="mes">
+                <p><strong>Mes: {mes_actual}</strong></p>
+            </div>
+        """
+
+        # Añadir los registros de asistencia para este funcionario
+        html_content += f"""
+            <div class="funcionario-info">
+                <table style="font-size: 6px; width: 100%; table-layout: fixed;">
+                    <tr>
+                        <td style="width: 50%; text-align: center; vertical-align: bottom; padding: 8px 2px 2px 2px; background-color: yellow;">
+                            <strong>FUNCIONARIO</strong>
+                        </td>
+                        <td style="width: 50%; text-align: center; vertical-align: bottom; padding: 8px 2px 2px 2px;">
+                            {nombre_funcionario}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="width: 50%; text-align: center; vertical-align: bottom; padding: 8px 2px 2px 2px; background-color: yellow;">
+                            <strong>RUT</strong>
+                        </td>
+                        <td style="width: 50%; text-align: center; vertical-align: bottom; padding: 8px 2px 2px 2px;">
+                            {rut_funcionario}
+                        </td>
+                    </tr>
+                </table>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th style="font-size: 10px; text-align: center; background-color: yellow; padding-top: 3px;">FECHA</th>
+                        <th style="font-size: 10px; text-align: center; background-color: yellow; padding-top: 3px;">MARCACIONES EN RELOJ</th>
+                    </tr>
+                </thead>
+                <tbody>
+        """
+
+        for asistencia in registros_funcionario:
+            html_content += f"""
+            <tr>
+                <td style="font-size: 10px; text-align: center; padding-top: 3px;">{asistencia.fecha.strftime('%d-%m-%Y')}</td>
+                <td style="font-size: 10px; text-align: center; padding-top: 3px;">{asistencia.marcaciones}</td>
+            </tr>
+            """
+        
+        html_content += "</tbody></table><br />"
+
+    html_content += """
+        </body>
+    </html>
+    """
+
+    # Convertir el HTML generado a PDF
+    pisa_status = pisa.CreatePDF(html_content, dest=response)
+
+    if pisa_status.err:
+        return HttpResponse('Error al generar el PDF', status=400)
+
+    return response
+
+
+
+
+
+
+def generar_pdfee(request):
+    # Obtener todos los registros de asistencia
+    asistencia_records = Asistencia.objects.all()
+
+    # Obtener la fecha y hora actual
+    fecha_emision = datetime.now()
+    fecha_actual = fecha_emision.strftime('%d-%m-%Y')
+    hora_emision = fecha_emision.strftime('%H:%M:%S')
+
+    # Traducir el mes al español
+    meses_espanol = {
+        'January': 'Enero', 'February': 'Febrero', 'March': 'Marzo',
+        'April': 'Abril', 'May': 'Mayo', 'June': 'Junio', 'July': 'Julio',
+        'August': 'Agosto', 'September': 'Septiembre', 'October': 'Octubre',
+        'November': 'Noviembre', 'December': 'Diciembre'
+    }
+    mes_actual = meses_espanol[fecha_emision.strftime('%B')]
+
+    # Inicialización de la respuesta HTTP
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = 'attachment; filename="informe_asistencia.pdf"'
+
+    # Convertir la imagen a Base64
+    imagen_path = os.path.join(settings.BASE_DIR, 'static', 'img', 'Cesfaaaam.png')
+
+    # Convertir imagen a base64
+    with open(imagen_path, "rb") as image_file:
+        encoded_image = base64.b64encode(image_file.read()).decode('utf-8')
+
+    # Crear la imagen en formato base64 para el HTML
+    imagen_base64 = f"data:image/png;base64,{encoded_image}"
+
+    # Plantilla HTML base para el PDF
+    html_content = f"""
+    <html>
+        <style>
+            body {{
+                font-family: Arial, sans-serif;
+                margin: 0;
+                padding: 0;
+            }}
+            h1 {{
+                text-align: center;
+                color: #0044cc;
+                border-bottom: 2px solid #0044cc;
+                margin-bottom: 20px;
+            }}
+            h2 {{
+                text-align: center;
+                font-size: 18px;
+            }}
+            table {{
+                width: 100%;
+                border-collapse: collapse;
+                margin-top: 10px;
+            }}
+            th, td {{
+                text-align: center;
+                border: 1px solid #ddd;
+            }}
+            th {{
+                background-color: #f2f2f2;
+                font-weight: bold;
+            }}
+            td {{
+                font-size: 12px;
+            }}
+            .header {{
+                display: flex;
+                justify-content: space-between;
+                margin-bottom: 20px;
+            }}
+            .header .izquierda {{
+                text-align: left;
+                font-size: 10px;
+            }}
+            .header .derecha {{
+                text-align: right;
+                font-size: 10px;
+            }}
+            .mes {{
+                text-align: center;
+                font-size: 14px;
+                font-weight: bold;
+            }}
+            .funcionario-info {{
+                text-align: center;
+                font-size: 12px;
+                margin-top: 20px;
+            }}
+            .logo {{
+                text-align: center;
+                margin-top: 10px;
+            }}
+            .logo img {{
+                width: 150px;
+            }}
+        </style>
+        <body>
+    """
+
+    # Filtrar registros por funcionario y crear HTML para cada uno
+    funcionarios = asistencia_records.values('nombre', 'rut').distinct()
+
+    for funcionario in funcionarios:
+        nombre_funcionario = funcionario['nombre']
+        rut_funcionario = funcionario['rut']
+        registros_funcionario = asistencia_records.filter(nombre=nombre_funcionario)
+
+        # Insertar encabezado antes de cada funcionario
+        html_content += f"""
+            <div class="header">
+                <div class="logo">
+                    <img src="{imagen_base64}" alt="Logo" style="width: 50px; height: auto;">
+                </div>
+                <div class="izquierda">
+                    <p><strong>MUNICIPALIDAD DE PAILLACO</strong></p>
+                    <p><strong>DEPARTAMENTO DE SALUD</strong></p>
+                </div>
+                <div class="derecha">
+                    <p><strong>Fecha de Emisión:</strong> {fecha_actual}</p>
+                    <p><strong>Hora de Emisión:</strong> {hora_emision}</p>
+                </div>
+            </div>
+
+            <h1>INFORME DE ASISTENCIA DE PERSONAL</h1>
+
+            <div class="mes">
+                <p><strong>Mes: {mes_actual}</strong></p>
+            </div>
+        """
+
+        # Añadir los registros de asistencia para este funcionario
+        html_content += f"""
+            <div class="funcionario-info">
+                <table style="font-size: 6px; width: 100%; table-layout: fixed;">
+                    <tr>
+                        <td style="width: 50%; text-align: center; vertical-align: bottom; padding: 8px 2px 2px 2px; background-color: yellow;">
+                            <strong>FUNCIONARIO</strong>
+                        </td>
+                        <td style="width: 50%; text-align: center; vertical-align: bottom; padding: 8px 2px 2px 2px;">
+                            {nombre_funcionario}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="width: 50%; text-align: center; vertical-align: bottom; padding: 8px 2px 2px 2px; background-color: yellow;">
+                            <strong>RUT</strong>
+                        </td>
+                        <td style="width: 50%; text-align: center; vertical-align: bottom; padding: 8px 2px 2px 2px;">
+                            {rut_funcionario}
+                        </td>
+                    </tr>
+                </table>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th style="font-size: 10px; text-align: center; background-color: yellow; padding-top: 3px;">FECHA</th>
+                        <th style="font-size: 10px; text-align: center; background-color: yellow; padding-top: 3px;">MARCACIONES EN RELOJ</th>
+                    </tr>
+                </thead>
+                <tbody>
+        """
+
+        for asistencia in registros_funcionario:
+            html_content += f"""
+            <tr>
+                <td style="font-size: 10px; text-align: center; padding-top: 3px;">{asistencia.fecha.strftime('%d-%m-%Y')}</td>
+                <td style="font-size: 10px; text-align: center; padding-top: 3px;">{asistencia.marcaciones}</td>
+            </tr>
+            """
+        
+        html_content += "</tbody></table><br />"
+
+    html_content += """
+        </body>
+    </html>
+    """
+
+    # Convertir el HTML generado a PDF
+    pisa_status = pisa.CreatePDF(html_content, dest=response)
+
+    if pisa_status.err:
+        return HttpResponse('Error al generar el PDF', status=400)
+
+    return response
+
+
+
+
+
+
+
+
+
+
+

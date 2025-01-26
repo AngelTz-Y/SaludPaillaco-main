@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seleccionar Usuario para Descargar Asistencia</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        label {
+            font-size: 16px;
+            color: #333;
+            display: block;
+            margin-bottom: 10px;
+        }
+        select {
+            font-size: 14px;
+            padding: 8px;
+            margin-bottom: 15px;
+            width: 100%;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        button {
+            font-size: 16px;
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 100%;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .mensaje {
+            color: red;
+            text-align: center;
+            font-size: 18px;
+        }
+        .info {
+            font-size: 16px;
+            color: #333;
+            margin-top: 10px;
+            text-align: center;
+        }
+        .download-link {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .download-link a {
+            color: #007bff;
+            text-decoration: none;
+            font-size: 16px;
+        }
+        .download-link a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <h1>Seleccionar Usuario para Descargar Asistencia</h1>
+    <div class="container">
+        <form method="POST">
+            {% csrf_token %}
+            
+            <!-- Selección de usuario -->
+            <label for="usuario">Selecciona un Usuario:</label>
+            <select name="usuario" id="usuario" required>
+                {% for usuario in usuarios %}
+                    <option value="{{ usuario.id }}">{{ usuario.user.get_full_name }}</option>
+                {% endfor %}
+            </select>
+            
+            <!-- Selección del mes -->
+            <label for="mes">Selecciona el Mes:</label>
+            <select name="mes" id="mes" required>
+                <option value="1">Enero</option>
+                <option value="2">Febrero</option>
+                <option value="3">Marzo</option>
+                <option value="4">Abril</option>
+                <option value="5">Mayo</option>
+                <option value="6">Junio</option>
+                <option value="7">Julio</option>
+                <option value="8">Agosto</option>
+                <option value="9">Septiembre</option>
+                <option value="10">Octubre</option>
+                <option value="11">Noviembre</option>
+                <option value="12">Diciembre</option>
+            </select>
+
+
+            <button type="submit">Descargar Registro</button>
+        </form>
+
+        {% if mensaje %}
+            <p class="mensaje">{{ mensaje }}</p>
+        {% endif %}
+
+        {% if pdf_encontrado %}
+            <!-- Si se encuentra el PDF, la descarga será automática -->
+            <script>
+                window.location.href = "{{ pdf_url }}";  // Esto redirige al archivo para descargarlo
+            </script>
+        {% endif %}
+
+        <div class="info">
+            <p>Selecciona el usuario, el mes y el formato para descargar el registro de asistencia.</p>
+        </div>
+    </div>
+</body>
+</html>

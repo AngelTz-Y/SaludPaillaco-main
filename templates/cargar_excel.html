@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Subir archivo Excel</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.0/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container mt-4">
+        <h1>Cargar archivo Excel</h1>
+        
+        <!-- Formulario para cargar archivo Excel -->
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit" class="btn btn-primary">Subir archivo</button>
+        </form>
+        
+        <!-- Botón para generar el PDF -->
+        <div class="mt-4">
+            <h3>Generar Informe PDF</h3>
+            <p>Después de subir el archivo, puedes generar el informe en formato PDF.</p>
+            <a href="{% url 'generar_pdf' %}" class="btn btn-success">Generar PDF</a>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.0/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

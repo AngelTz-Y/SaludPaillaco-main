@@ -1,22 +1,8 @@
-"""
-URL configuration for SaludPaillaco project.
-
-The `urlpatterns` list routes URLs to views. For more information please see:
-    https://docs.djangoproject.com/en/5.0/topics/http/urls/
-Examples:
-Function views
-    1. Add an import:  from my_app import views
-    2. Add a URL to urlpatterns:  path('', views.home, name='home')
-Class-based views
-    1. Add an import:  from other_app.views import Home
-    2. Add a URL to urlpatterns:  path('', Home.as_view(), name='home')
-Including another URLconf
-    1. Import the include() function: from django.urls import include, path
-    2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
-"""
 from django.contrib import admin
 from django.urls import path
 from App_SaludPaillaco.views import *
+from django.conf import settings
+from django.conf.urls.static import static
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -25,10 +11,15 @@ urlpatterns = [
     path('registro_exitoso/', registro_exitoso, name='registro_exitoso'),
     path('aceptacion_usuario/', aceptacion_usuario, name='aceptacion_usuario'),
     path('Panel_Administrador/', panel_administrador, name='panel_administrador'),
-    path('cargar-asistencia-varios/', cargar_asistencia_varios, name='cargar_asistencia_varios'),
     path('cargar_asistencia/', cargar_asistencia_uno, name='cargar_asistencia'),
-    path('descargar_asistencia/', descargar_asistencia, name='descargar_asistencia'),
-    
-    
+    path('descargar_asistencia/', descargar_registro_asistencia, name='descargar_asistencia'),
+    path('descargar_asistencia/<str:rut>/<int:mes>/<int:año>/', descargar_asistencia, name='descargar_asistencia_usuario'),
+    path('descargar-pdf/', descargar_pdf_perfil, name='descargar_pdf_perfil'),
+    path('cargar_excel/', cargar_excel, name='cargar_excel'),
+    path('generar_pdf/', generar_pdf, name='generar_pdf')
+
     
 ]
+
+# Agregar rutas para servir archivos estáticos y multimedia en desarrollo
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
